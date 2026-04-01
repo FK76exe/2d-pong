@@ -1,0 +1,8 @@
+canvas {
+    display: block;
+    margin: 0 auto;
+    /* What does image-rendering do?
+
+    */
+    image-rendering: pixelated;
+}

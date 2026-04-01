@@ -9,7 +9,7 @@ Just a place for me to map out what needs to be done :)
 ### First Stage - Seeing and Moving
 The goal of this stage is to set up the main parts of Pong:
 
-**R1:** Render the "arena", player bar, and opponent bar onto the screen 
+✅ **R1:** Render the "arena", player bar, and opponent bar onto the screen 
 
 **R2:** Enable the player to move the bar on the vertical axis with the "up" and "down" arrow keys
 
