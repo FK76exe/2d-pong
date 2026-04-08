@@ -1,3 +1,5 @@
+import Bar from "./bar.js";
+
 // alright, time for the fun stuff
 // game is a module that will manage the game's main operations, like drawing the canvas
 let Game = {};
@@ -8,25 +10,44 @@ const canvas = document.getElementById("canvas")
  * and puck and everything else within the context!
  */
 const context = canvas.getContext("2d")
-// player's vertical position is stored as a variable and will be manipulated
-let playerY = 175;
+
+// The bars are a class
+
+/* The bar class represents the player and AI's bar.
+It will hold bar data will be drawn into the canvas
+
+NOTE: In a canvas, the origin is on top left!
+positive x = movement towards the right
+positive y = movement towards the bottom
+*/
+let playerBar = new Bar(665, 175);
+let oppBar = new Bar(20, 175);
 
 // player coord is a param of drawCanvas, updating bar location on new drawing
-function drawCanvas(y) {
-    // NOTE: In a canvas, the origin is on top left!
-    // positive x = movement towards the right
-    // positive y = movement towards the bottom
+function drawCanvas() {
     // create the arena
     context.fillStyle = "black";
     // fillRect is what makes rectangles... such as the arena and bars
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     // player bar - right bar
-    context.fillStyle = "white";
-    context.fillRect(665, y, 15, 70);
+    
+    context.fillStyle = playerBar.fields.colour;
+    context.fillRect(
+        playerBar.fields.x,
+        playerBar.fields.y,
+        playerBar.fields.width,
+        playerBar.fields.height
+    );
 
     // AI bar - left bar
-    context.fillRect(20, 175, 15, 70);
+    context.fillStyle = oppBar.fields.colour;
+    context.fillRect(
+        oppBar.fields.x,
+        oppBar.fields.y,
+        oppBar.fields.width,
+        oppBar.fields.height
+    );
 
     // boundary between halves
     context.fillStyle = "grey";
@@ -35,9 +56,10 @@ function drawCanvas(y) {
         context.fillRect(347.5, y_position, 5, 20);
         y_position += 30;
     }
-    while (true) {
-        requestAnimationFrame()
-    }
+    // why did I have this?
+    // while (true) {
+    //     requestAnimationFrame()
+    // }
 }
 
 // player controls
@@ -48,18 +70,18 @@ const speed = 10;
 // W and S will be up and down respectively
 addEventListener("keydown", (keyboardEvent) => {
     // need to do some boundary checking first!
-    if (keyboardEvent.code === "KeyW" && playerY > 0) {
-        playerY -= speed;
+    if (keyboardEvent.code === "KeyW" && playerBar.pos_y > 0) {
+        playerBar.move(-speed);
     }
     // 400 (h of canvas) - 70 (h of bar) = 330
-    else if (keyboardEvent.code == "KeyS" && playerY < 330) {
-        playerY += speed;
+    else if (keyboardEvent.code == "KeyS" && playerBar.pos_y < 330) {
+        playerBar.move(speed);
     }
 })
 
 // game loop -> redraws canvas with updated player position
 Game.run = function() {
-    drawCanvas(playerY);
+    drawCanvas();
 }
 /** What's all this?
  * setInterval takes in a function and repeatedly execute over a 
