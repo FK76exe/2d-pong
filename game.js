@@ -61,6 +61,7 @@ function drawCanvas() {
 
 
     // draw puck
+    context.fillStyle = "white";
     context.beginPath();
     context.arc(puck.x, puck.y, 10, 0, 2 * Math.PI);
     context.stroke();
