@@ -1,0 +1,14 @@
+class Puck {
+    constructor(x, y, vector) {
+        this.x = x;
+        this.y = y;
+        this.vector = vector;
+        this.speed = 5;
+    }
+
+    move() {
+        this.x += this.vector.x * this.speed;
+    }
+}
+
+export default Puck;
