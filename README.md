@@ -15,9 +15,9 @@ The goal of this stage is to set up the main parts of Pong:
 
 ### Second Stage - The Puck, Collision Detection, and AI
 
-**R3:** Genereate a puck that is emitted from the centre of the arena
+✅ **R3:** Genereate a puck that is emitted from the centre of the arena
 
-**R3.1:** Enable collision detection with bars and the arena wall, changing its direction angle (remember vectors from math? May wanna look into that...)
+✅ **R3.1:** Enable collision detection with bars and the arena wall, changing its direction angle (remember vectors from math? May wanna look into that...)
 
 **R4:** Get the opponent bar to "react" to the puck's movements.
 

@@ -51,6 +51,15 @@ function drawCanvas() {
         oppBar.height
     );
 
+    // boundary between halves
+    context.fillStyle = "grey";
+    let y_position = 0;
+    while (y_position < 740) {
+        context.fillRect(347.5, y_position, 5, 20);
+        y_position += 30;
+    }
+
+
     // draw puck
     context.beginPath();
     context.arc(puck.x, puck.y, 10, 0, 2 * Math.PI);
@@ -60,13 +69,6 @@ function drawCanvas() {
     // move puck
     puck.move();
 
-    // boundary between halves
-    context.fillStyle = "grey";
-    let y_position = 0;
-    while (y_position < 740) {
-        context.fillRect(347.5, y_position, 5, 20);
-        y_position += 30;
-    }
     // why did I have this?
     // while (true) {
     //     requestAnimationFrame()
