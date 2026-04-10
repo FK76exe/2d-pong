@@ -15,9 +15,9 @@ The goal of this stage is to set up the main parts of Pong:
 
 ### Second Stage - The Puck, Collision Detection, and AI
 
-**R3:** Genereate a puck that is emitted from the centre of the arena
+✅ **R3:** Genereate a puck that is emitted from the centre of the arena
 
-**R3.1:** Enable collision detection with bars and the arena wall, changing its direction angle (remember vectors from math? May wanna look into that...)
+✅ **R3.1:** Enable collision detection with bars and the arena wall, changing its direction angle (remember vectors from math? May wanna look into that...)
 
 **R4:** Get the opponent bar to "react" to the puck's movements.
 
@@ -33,3 +33,8 @@ Be sure to display that game is paused and tell player how to resume.
 **R8:** Map controls for mouse and give player option to pick mouse or keyboard when starting up game
 
 **R9:** Create a starter screen that displays control options and how to play the game.
+
+# How to Run Locally
+Run a live server with `python -m http.server` in a command shell in the root directory.
+
+Why a server? Well, if my understanding of this [site](https://security.stackexchange.com/questions/201208/why-do-browsers-disallow-accessing-files-from-local-file-system-even-if-the-html) is correct, security issues in the past have taught browser developers that it should only fetch JS files rather than doubling as a server.
