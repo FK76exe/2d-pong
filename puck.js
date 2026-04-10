@@ -8,6 +8,7 @@ class Puck {
 
     move() {
         this.x += this.vector.x * this.speed;
+        this.y += this.vector.y * this.speed;
     }
 }
 

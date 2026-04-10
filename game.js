@@ -34,21 +34,21 @@ function drawCanvas() {
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     // player bar - right bar
-    context.fillStyle = playerBar.fields.colour;
+    context.fillStyle = "white";
     context.fillRect(
-        playerBar.fields.x,
-        playerBar.fields.y,
-        playerBar.fields.width,
-        playerBar.fields.height
+        playerBar.x,
+        playerBar.y,
+        playerBar.width,
+        playerBar.height
     );
 
     // AI bar - left bar
-    context.fillStyle = oppBar.fields.colour;
+    context.fillStyle = "white";
     context.fillRect(
-        oppBar.fields.x,
-        oppBar.fields.y,
-        oppBar.fields.width,
-        oppBar.fields.height
+        oppBar.x,
+        oppBar.y,
+        oppBar.width,
+        oppBar.height
     );
 
     // draw puck
@@ -81,7 +81,7 @@ const speed = 10;
 // W and S will be up and down respectively
 addEventListener("keydown", (keyboardEvent) => {
     // need to do some boundary checking first!
-    if (keyboardEvent.code === "KeyW" && playerBar.y > 0) {
+    if (keyboardEvent.code == "KeyW" && playerBar.y > 0) {
         playerBar.move(-speed);
     }
     // 400 (h of canvas) - 70 (h of bar) = 330
@@ -113,7 +113,8 @@ function handlePuckCollisions() {
     // what happens if it hits arena and bar? 
     handleArenaPuckCollisions();
     // handle bar collisions -> should change to paddle
-    handleBarPuckCollisions();
+    handlePlayerBarPuckCollisions();
+    handleOppBarPuckCollisions();
 }
 
 // puck-to-arena collisions
@@ -124,11 +125,56 @@ function handleArenaPuckCollisions() {
     }
 }
 
-function handleBarPuckCollisions() {
-    if (oppBar.isColliding(puck)) {
-        puck.vector = oppBar.getCollisionVector(puck.y);
+const boundingBoxMargin = 5;
+// puck-to-player bar collisions
+// keep it as a function for now... we can refactor later
+function handlePlayerBarPuckCollisions() {
+    // REMEMBER: position of player is top-left corner
+    // so [x, x+width] is the vertical plane the puck must cross
+    // and [y, y+height] is the range it must be in
+    // what if it goes beyond? that is a score
+    if ( 
+        puck.x >= playerBar.x + boundingBoxMargin 
+        && puck.x <= playerBar.x + playerBar.width
+        && puck.y >= playerBar.y - boundingBoxMargin
+        && puck.y <= playerBar.y + playerBar.height + boundingBoxMargin
+    ) {
+        let newVector = updateCollisionVector(puck.y, playerBar);
+        newVector.x = -(newVector.x);
+        puck.vector = newVector;
     }
-    else if (playerBar.isColliding(puck)) {
-        puck.vector = playerBar.getCollisionVector(puck.y);
+}
+
+function handleOppBarPuckCollisions() {
+    // remember: we have to look at collisions alongside right-side, so
+    // add width
+    if ( 
+        // flipped the signs around to detect collisions from the right side
+        puck.x <= oppBar.x + oppBar.width + boundingBoxMargin
+        && puck.x >= oppBar.x
+        && puck.y >= oppBar.y - boundingBoxMargin
+        && puck.y <= oppBar.y + oppBar.height + boundingBoxMargin
+    ) {
+        let newVector = updateCollisionVector(puck.y, oppBar);
+        puck.vector = newVector;
     }
+}
+
+function updateCollisionVector(yImpact, bar) {
+    /** 
+     * yImpact is the point on the bar's height the object made impact
+     * with. Get the ratio of yImpact / (max - min) and then normalize
+     * to get it within range (pi/4, -pi/4)
+     * Finally, create a unit vector where x = cos-1(angle) and
+     * y = sin-1(angle)
+     */
+    // 1. normalize point of impact with min-max normalization
+    let ratio = (yImpact - bar.y) / bar.height;
+    // in case of bounding box hit -> round down to 1 or up to 0
+    ratio = Math.max(0, ratio);
+    ratio = Math.min(1, ratio);
+    // 2. convert to radians (negative sign flips it)
+    let angleRadians = ((Math.PI/2 * ratio) - Math.PI/4);
+    // 3. create vector, and deflect horizontally.
+    return new Vector2D(Math.cos(angleRadians), Math.sin(angleRadians));
 }
