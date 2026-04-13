@@ -132,7 +132,7 @@ function handleArenaPuckCollisions() {
     }
 }
 
-const boundingBoxMargin = 5;
+const boundingBoxMargin = 12;
 // puck-to-player bar collisions
 // keep it as a function for now... we can refactor later
 function handlePlayerBarPuckCollisions() {
@@ -140,11 +140,13 @@ function handlePlayerBarPuckCollisions() {
     // so [x, x+width] is the vertical plane the puck must cross
     // and [y, y+height] is the range it must be in
     // what if it goes beyond? that is a score
+
+    // to prevent puck cutting through player bar... up the margin
     if ( 
-        puck.x >= playerBar.x + boundingBoxMargin 
-        && puck.x <= playerBar.x + playerBar.width
-        && puck.y >= playerBar.y - boundingBoxMargin
-        && puck.y <= playerBar.y + playerBar.height + boundingBoxMargin
+        puck.x >= playerBar.x - boundingBoxMargin // inward-facing side w/ margin
+        && puck.x <= playerBar.x + playerBar.width // outward-side/interior
+        && puck.y >= playerBar.y - boundingBoxMargin // top end w/ margin
+        && puck.y <= playerBar.y + playerBar.height + boundingBoxMargin // bottom w/ margin
     ) {
         let newVector = updateCollisionVector(puck.y, playerBar);
         newVector.x = -(newVector.x);
@@ -201,16 +203,21 @@ function updateCollisionVector(yImpact, bar) {
  * -> this needs to be run in game loop with every frame
  * DO NOT LOCK TO PUCK'S LOCATION PROGRAMMATICALLY. NEEDS TO BEHAVE LIKE A HUMAN
  * 
- * issue: the opponent bar is too good -> catches puck all the time... how to fix? reaction time?
+ * issue: the opponent bar is too good -> catches puck all the time... how to fix?
+ * - give it a speed < puck (otherwise it will always catch it)
+ * - have it only react if the puck is x pixels away (mimic "reading" play)
  */
-const reactionTime = 0.2;
+const opponentSpeed = 5;
 function handleOpponentBehaviour() {
-    if (puck.y > oppBar.y + oppBar.height && oppBar.y < 330) { // puck is below oppBar's bottom
-        oppBar.move(speed)
+    if (puck.x < canvas.width * 0.75) {
+        if (puck.y > oppBar.y + oppBar.height && oppBar.y < 330) { // puck is below oppBar's bottom
+            oppBar.move(opponentSpeed)
+        }
+        else if (oppBar.y > puck.y && oppBar.y > 0) { // puck is above oppBar' top
+            oppBar.move(-opponentSpeed);
+        }
+        // if it's equal, no need to change anything
     }
-    else if (oppBar.y > puck.y && oppBar.y > 0) { // puck is above oppBar' top
-        oppBar.move(-speed);
-    }
-    // if it's equal, no need to change anything
+
 }
 
