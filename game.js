@@ -2,6 +2,8 @@ import Bar from "./bar.js";
 import Puck from "./puck.js";
 import Vector2D from "./vector.js";
 
+// TODO: Refactor
+
 // alright, time for the fun stuff
 // game is a module that will manage the game's main operations, like drawing the canvas
 let Game = {};
@@ -94,8 +96,10 @@ addEventListener("keydown", (keyboardEvent) => {
 })
 
 // game loop -> redraws canvas with updated player position
+// add update logic here.
 Game.run = function() {
     handlePuckCollisions();
+    handleOpponentBehaviour();
     drawCanvas();
 }
 /** What's all this?
@@ -181,3 +185,32 @@ function updateCollisionVector(yImpact, bar) {
     // 3. create vector, and deflect horizontally.
     return new Vector2D(Math.cos(angleRadians), Math.sin(angleRadians));
 }
+
+/** AI
+ * iirc from cps643...
+ * Sense: what do I (AI POV) need to look for
+ * - puck location (where to go)
+ * Think: what should I do based on where puck is going?
+ * - I need to stay close to puck's location on y-axis -> why? to react better to collisions
+ * Act:
+ * - move myself to puck's location at my speed
+ * 
+ * so to program...
+ * 1. get puck's vertical location RELATIVE to my location (is it above or below? Or the same?)
+ * 2. move myself until I'm at puck's vertical location
+ * -> this needs to be run in game loop with every frame
+ * DO NOT LOCK TO PUCK'S LOCATION PROGRAMMATICALLY. NEEDS TO BEHAVE LIKE A HUMAN
+ * 
+ * issue: the opponent bar is too good -> catches puck all the time... how to fix? reaction time?
+ */
+const reactionTime = 0.2;
+function handleOpponentBehaviour() {
+    if (puck.y > oppBar.y + oppBar.height && oppBar.y < 330) { // puck is below oppBar's bottom
+        oppBar.move(speed)
+    }
+    else if (oppBar.y > puck.y && oppBar.y > 0) { // puck is above oppBar' top
+        oppBar.move(-speed);
+    }
+    // if it's equal, no need to change anything
+}
+
