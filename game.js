@@ -31,6 +31,7 @@ let puck = new Puck(350, 200, new Vector2D(1, 0));
 let isPuckInArena = true;
 let puckExitTime = Date.now();
 // player coord is a param of drawCanvas, updating bar location on new drawing
+let isGameOver = false;
 function drawCanvas() {
     // create the arena
     context.fillStyle = "black";
@@ -63,6 +64,12 @@ function drawCanvas() {
         y_position += 30;
     }
 
+    // display score
+    // opponent score
+    context.font = "bold 60px serif";
+    context.fillText(oppScore, 300, 60);
+    context.fillText(playerScore, 370, 60);
+
     /** Draw puck if...
      * 1. puck is in arena
      * 2. the respawn delay is complete
@@ -81,8 +88,6 @@ function drawCanvas() {
         // move puck
         puck.move();
     }
-
-
     // why did I have this?
     // while (true) {
     //     requestAnimationFrame()
@@ -112,7 +117,14 @@ addEventListener("keyup", (keyboardEvent) => {
 
 // game loop -> redraws canvas with updated player position
 // add update logic here.
+let playerScore = 0;
+let oppScore = 0;
 Game.run = function() {
+    // if someone scores 10 -> GG
+    if (playerScore == 10 || oppScore == 10) {
+        isGameOver = true;
+    }
+
     handleInput();
     handlePuckCollisions();
     handleOpponentBehaviour();
@@ -144,7 +156,6 @@ Game._intervalId = setInterval(Game.run, 1000 / fps);
 
 function handlePuckCollisions() {
     // if the puck collided with any of these objects,
-    
     // what happens if it hits arena and bar? 
     handleArenaPuckCollisions();
     // handle bar collisions -> should change to paddle
@@ -160,6 +171,10 @@ function handleArenaPuckCollisions() {
     }
     // if the puck is beyond the vertical bars, reset its location after a two-second wait
     if (puck.x < 0 || puck.x >= 700) {
+        // manage score
+        if (puck.x < 0) { playerScore++; }
+        else {oppScore++;}
+
         isPuckInArena = false;
         puckExitTime = Date.now();
         // relocate
@@ -167,6 +182,7 @@ function handleArenaPuckCollisions() {
         puck.y = 200;
         // generate new direction vector
         puck.vector = generateRandom2DVector();
+
     }
 }
 
