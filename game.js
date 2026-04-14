@@ -28,6 +28,8 @@ let playerBar = new Bar(665, 175);
 let oppBar = new Bar(20, 175);
 let puck = new Puck(350, 200, new Vector2D(1, 0));
 
+let isPuckInArena = true;
+let puckExitTime = Date.now();
 // player coord is a param of drawCanvas, updating bar location on new drawing
 function drawCanvas() {
     // create the arena
@@ -61,16 +63,26 @@ function drawCanvas() {
         y_position += 30;
     }
 
+    /** Draw puck if...
+     * 1. puck is in arena
+     * 2. the respawn delay is complete
+     */
+    if (isPuckInArena || Date.now() - puckExitTime >= 2000) {
+        context.fillStyle = "white";
+        context.beginPath();
+        context.arc(puck.x, puck.y, 10, 0, 2 * Math.PI);
+        context.stroke();
+        context.fill();
 
-    // draw puck
-    context.fillStyle = "white";
-    context.beginPath();
-    context.arc(puck.x, puck.y, 10, 0, 2 * Math.PI);
-    context.stroke();
-    context.fill();
+        // reset vars
+        puckExitTime = Date.now();
+        isPuckInArena = true;
 
-    // move puck
-    puck.move();
+        // move puck
+        puck.move();
+    }
+
+
 
     // why did I have this?
     // while (true) {
@@ -130,9 +142,19 @@ function handleArenaPuckCollisions() {
     if (puck.y <= 0 || puck.y >= 400) { // just reverse y-coord
         puck.vector = new Vector2D(puck.vector.x, -puck.vector.y);
     }
+    // if the puck is beyond the vertical bars, reset its location after a two-second wait
+    if (puck.x < 0 || puck.x >= 700) {
+        isPuckInArena = false;
+        puckExitTime = Date.now();
+        // relocate
+        puck.x = 350;
+        puck.y = 200;
+        // generate new direction vector
+        puck.vector = generateRandom2DVector();
+    }
 }
 
-const boundingBoxMargin = 12;
+const boundingBoxMargin = 10;
 // puck-to-player bar collisions
 // keep it as a function for now... we can refactor later
 function handlePlayerBarPuckCollisions() {
@@ -221,3 +243,7 @@ function handleOpponentBehaviour() {
 
 }
 
+function generateRandom2DVector() {
+    let angle = (Math.random()*Math.PI/2) - Math.PI/4;
+    return new Vector2D(Math.cos(angle), Math.sin(angle));
+}
