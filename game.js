@@ -83,7 +83,6 @@ function drawCanvas() {
     }
 
 
-
     // why did I have this?
     // while (true) {
     //     requestAnimationFrame()
@@ -96,24 +95,41 @@ function drawCanvas() {
 const speed = 10;
 // keydown event is triggered when we press any key
 // W and S will be up and down respectively
+let pressedKey = null; // handle one key at a time
 addEventListener("keydown", (keyboardEvent) => {
-    // need to do some boundary checking first!
-    if (keyboardEvent.code == "KeyW" && playerBar.y > 0) {
-        playerBar.move(-speed);
-    }
-    // 400 (h of canvas) - 70 (h of bar) = 330
-    else if (keyboardEvent.code == "KeyS" && playerBar.y < 330) {
-        playerBar.move(speed);
-    }
+    pressedKey = keyboardEvent.code; // code => key
 })
+
+addEventListener("keyup", (keyboardEvent) => {
+    pressedKey = null; // no key? no input
+})
+
+
+// BUG: there is a small pause after pressing key down, then it continues like normal
+// This is due to OS/browser preventing accidental input
+// to bypass: manage keyboard input in event loop where it checks at interval (smoother?)
+// https://www.reddit.com/r/javascript/comments/1bzdzgo/comment/kypd69h/
 
 // game loop -> redraws canvas with updated player position
 // add update logic here.
 Game.run = function() {
+    handleInput();
     handlePuckCollisions();
     handleOpponentBehaviour();
     drawCanvas();
 }
+
+function handleInput() {
+    // need to do some boundary checking first!
+    if (pressedKey == "KeyW" && playerBar.y > 0) {
+        playerBar.move(-speed);
+    }
+    // 400 (h of canvas) - 70 (h of bar) = 330
+    else if (pressedKey == "KeyS" && playerBar.y < 330) {
+        playerBar.move(speed);
+    }    
+}
+
 /** What's all this?
  * setInterval takes in a function and repeatedly execute over a 
  * provided interval.
