@@ -21,7 +21,7 @@ The goal of this stage is to set up the main parts of Pong:
 
 ✅ **R4:** Get the opponent bar to "react" to the puck's movements.
 
-**R4.1:** Respawn the puck when it gets reaches the end of a barrier after 2 seconds
+✅ **R4.1:** Respawn the puck when it gets reaches the end of a barrier after 2 seconds
 
 ### Third Stage - Cosmetics and Touch-Ups
 
