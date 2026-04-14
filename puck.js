@@ -3,7 +3,7 @@ class Puck {
         this.x = x;
         this.y = y;
         this.vector = vector;
-        this.speed = 12;
+        this.speed = 10;
     }
 
     move() {

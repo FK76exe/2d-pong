@@ -28,6 +28,8 @@ let playerBar = new Bar(665, 175);
 let oppBar = new Bar(20, 175);
 let puck = new Puck(350, 200, new Vector2D(1, 0));
 
+let isPuckInArena = true;
+let puckExitTime = Date.now();
 // player coord is a param of drawCanvas, updating bar location on new drawing
 function drawCanvas() {
     // create the arena
@@ -61,16 +63,25 @@ function drawCanvas() {
         y_position += 30;
     }
 
+    /** Draw puck if...
+     * 1. puck is in arena
+     * 2. the respawn delay is complete
+     */
+    if (isPuckInArena || Date.now() - puckExitTime >= 2000) {
+        context.fillStyle = "white";
+        context.beginPath();
+        context.arc(puck.x, puck.y, 10, 0, 2 * Math.PI);
+        context.stroke();
+        context.fill();
 
-    // draw puck
-    context.fillStyle = "white";
-    context.beginPath();
-    context.arc(puck.x, puck.y, 10, 0, 2 * Math.PI);
-    context.stroke();
-    context.fill();
+        // reset vars
+        puckExitTime = Date.now();
+        isPuckInArena = true;
 
-    // move puck
-    puck.move();
+        // move puck
+        puck.move();
+    }
+
 
     // why did I have this?
     // while (true) {
@@ -84,24 +95,41 @@ function drawCanvas() {
 const speed = 10;
 // keydown event is triggered when we press any key
 // W and S will be up and down respectively
+let pressedKey = null; // handle one key at a time
 addEventListener("keydown", (keyboardEvent) => {
-    // need to do some boundary checking first!
-    if (keyboardEvent.code == "KeyW" && playerBar.y > 0) {
-        playerBar.move(-speed);
-    }
-    // 400 (h of canvas) - 70 (h of bar) = 330
-    else if (keyboardEvent.code == "KeyS" && playerBar.y < 330) {
-        playerBar.move(speed);
-    }
+    pressedKey = keyboardEvent.code; // code => key
 })
+
+addEventListener("keyup", (keyboardEvent) => {
+    pressedKey = null; // no key? no input
+})
+
+
+// BUG: there is a small pause after pressing key down, then it continues like normal
+// This is due to OS/browser preventing accidental input
+// to bypass: manage keyboard input in event loop where it checks at interval (smoother?)
+// https://www.reddit.com/r/javascript/comments/1bzdzgo/comment/kypd69h/
 
 // game loop -> redraws canvas with updated player position
 // add update logic here.
 Game.run = function() {
+    handleInput();
     handlePuckCollisions();
     handleOpponentBehaviour();
     drawCanvas();
 }
+
+function handleInput() {
+    // need to do some boundary checking first!
+    if (pressedKey == "KeyW" && playerBar.y > 0) {
+        playerBar.move(-speed);
+    }
+    // 400 (h of canvas) - 70 (h of bar) = 330
+    else if (pressedKey == "KeyS" && playerBar.y < 330) {
+        playerBar.move(speed);
+    }    
+}
+
 /** What's all this?
  * setInterval takes in a function and repeatedly execute over a 
  * provided interval.
@@ -130,9 +158,19 @@ function handleArenaPuckCollisions() {
     if (puck.y <= 0 || puck.y >= 400) { // just reverse y-coord
         puck.vector = new Vector2D(puck.vector.x, -puck.vector.y);
     }
+    // if the puck is beyond the vertical bars, reset its location after a two-second wait
+    if (puck.x < 0 || puck.x >= 700) {
+        isPuckInArena = false;
+        puckExitTime = Date.now();
+        // relocate
+        puck.x = 350;
+        puck.y = 200;
+        // generate new direction vector
+        puck.vector = generateRandom2DVector();
+    }
 }
 
-const boundingBoxMargin = 12;
+const boundingBoxMargin = 10;
 // puck-to-player bar collisions
 // keep it as a function for now... we can refactor later
 function handlePlayerBarPuckCollisions() {
@@ -221,3 +259,7 @@ function handleOpponentBehaviour() {
 
 }
 
+function generateRandom2DVector() {
+    let angle = (Math.random()*Math.PI/2) - Math.PI/4;
+    return new Vector2D(Math.cos(angle), Math.sin(angle));
+}
