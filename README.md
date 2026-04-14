@@ -25,7 +25,7 @@ The goal of this stage is to set up the main parts of Pong:
 
 ### Third Stage - Cosmetics and Touch-Ups
 
-**R5:** Display scoring and end the game when one player reaches ten points.
+✅ **R5:** Display scoring and end the game when one player reaches ten points.
 
 **R6:** Create a "pause" feature to freeze game movements.
 Be sure to display that game is paused and tell player how to resume.

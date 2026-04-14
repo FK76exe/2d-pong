@@ -31,7 +31,6 @@ let puck = new Puck(350, 200, new Vector2D(1, 0));
 let isPuckInArena = true;
 let puckExitTime = Date.now();
 // player coord is a param of drawCanvas, updating bar location on new drawing
-let isGameOver = false;
 function drawCanvas() {
     // create the arena
     context.fillStyle = "black";
@@ -121,8 +120,13 @@ let playerScore = 0;
 let oppScore = 0;
 Game.run = function() {
     // if someone scores 10 -> GG
-    if (playerScore == 10 || oppScore == 10) {
-        isGameOver = true;
+    if (Math.max(playerScore, oppScore) == 10) {
+        // game is over, so show the winner
+        context.fillStyle = "red";
+        context.textAlign = "center";
+        context.font = "bold 100px serif";
+        context.fillText(playerScore > oppScore ? "You Win" : "Try Again", 350, 200);
+        return; // freezes the game
     }
 
     handleInput();
