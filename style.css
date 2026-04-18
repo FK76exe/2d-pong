@@ -6,3 +6,10 @@ canvas {
     */
     image-rendering: pixelated;
 }
+
+p#pause-msg {
+    visibility: hidden;
+    color: red;
+    font: bold 20px serif;
+    text-align: center;
+}

@@ -1,6 +1,7 @@
 import Bar from "./bar.js";
 import Puck from "./puck.js";
 import Vector2D from "./vector.js";
+import GameState from "./game_state.js";
 
 // TODO: Refactor
 
@@ -15,6 +16,7 @@ const canvas = document.getElementById("canvas")
  */
 const context = canvas.getContext("2d")
 
+const pauseMsg = document.getElementById("pause-msg")
 // The bars are a class
 
 /* The bar class represents the player and AI's bar.
@@ -27,9 +29,8 @@ positive y = movement towards the bottom
 let playerBar = new Bar(665, 175);
 let oppBar = new Bar(20, 175);
 let puck = new Puck(350, 200, new Vector2D(1, 0));
+let gameState = new GameState();
 
-let isPuckInArena = true;
-let puckExitTime = Date.now();
 // player coord is a param of drawCanvas, updating bar location on new drawing
 function drawCanvas() {
     // create the arena
@@ -66,14 +67,14 @@ function drawCanvas() {
     // display score
     // opponent score
     context.font = "bold 60px serif";
-    context.fillText(oppScore, 300, 60);
-    context.fillText(playerScore, 370, 60);
+    context.fillText(gameState.score.opp, 300, 60);
+    context.fillText(gameState.score.player, 370, 60);
 
     /** Draw puck if...
      * 1. puck is in arena
      * 2. the respawn delay is complete
      */
-    if (isPuckInArena || Date.now() - puckExitTime >= 2000) {
+    if (gameState.puckStatus.inArena || Date.now() - gameState.puckStatus.arenaExitTime >= 2000) {
         context.fillStyle = "white";
         context.beginPath();
         context.arc(puck.x, puck.y, 10, 0, 2 * Math.PI);
@@ -81,8 +82,8 @@ function drawCanvas() {
         context.fill();
 
         // reset vars
-        puckExitTime = Date.now();
-        isPuckInArena = true;
+        gameState.puckStatus.arenaExitTime = Date.now();
+        gameState.puckStatus.inArena = true;
 
         // move puck
         puck.move();
@@ -100,12 +101,45 @@ const speed = 10;
 // keydown event is triggered when we press any key
 // W and S will be up and down respectively
 let pressedKey = null; // handle one key at a time
+
+/** Controls and Keypresses
+ * W (move bar up)
+ * keydown -> summon the action and start moving up
+ * keyup -> action has stopped -> stop moving bar
+ * 
+ * S (move bar down)
+ * keydown -> start moving bar down
+ * keyup -> stop moving bar
+ * 
+ * P (pause/resume)
+ * keydown -> reverse the pause/play state (if playing previously, pause, v.v)
+ * keyup -> Don't do anything! Only another keydown can change state
+ */
+
 addEventListener("keydown", (keyboardEvent) => {
-    pressedKey = keyboardEvent.code; // code => key
+    // if key is P -> add/remove depending on if it is present or not
+    if (keyboardEvent.code == "KeyP") {
+        if (gameState.activeKeys.has("KeyP")) {
+            gameState.activeKeys.delete("KeyP");
+        }
+        else {
+            gameState.activeKeys.add("KeyP");
+        }
+    }
+    // otherwise if it's W/S and not present, add
+    else if (gameState.validKeys.has(keyboardEvent.code)) {
+        // set silently ignores key if already present
+        gameState.activeKeys.add(keyboardEvent.code)
+    }
 })
 
 addEventListener("keyup", (keyboardEvent) => {
-    pressedKey = null; // no key? no input
+    // if key is P -> ignore
+    if (keyboardEvent.code == "KeyP") {
+        return;
+    }
+    // else -> remove (set ignores elems that don't exist)
+    gameState.activeKeys.delete(keyboardEvent.code);
 })
 
 
@@ -116,34 +150,44 @@ addEventListener("keyup", (keyboardEvent) => {
 
 // game loop -> redraws canvas with updated player position
 // add update logic here.
-let playerScore = 0;
-let oppScore = 0;
 Game.run = function() {
-    // if someone scores 10 -> GG
-    if (Math.max(playerScore, oppScore) == 10) {
-        // game is over, so show the winner
-        context.fillStyle = "red";
-        context.textAlign = "center";
-        context.font = "bold 100px serif";
-        context.fillText(playerScore > oppScore ? "You Win" : "Try Again", 350, 200);
-        return; // freezes the game
+    // if the game is paused, don't change a thing
+    if (!gameState.isGamePaused()) {
+        // if someone scores 10 -> GG
+        if (Math.max(gameState.score.player, gameState.score.opp) == 10) {
+            // game is over, so show the winner
+            context.fillStyle = "red";
+            context.textAlign = "center";
+            context.font = "bold 100px serif";
+            context.fillText(gameState.score.player > gameState.score.opp ? "You Win" : "Try Again", 350, 200);
+            return; // freezes the game
+        }
+        handlePuckCollisions();
+        handleOpponentBehaviour();
+        drawCanvas();
+        pauseMsg.style.visibility = "hidden";
+    }
+    else {
+        pauseMsg.style.visibility = "visible";
     }
 
-    handleInput();
-    handlePuckCollisions();
-    handleOpponentBehaviour();
-    drawCanvas();
+    // input should be handled regardless if game is paused or not
+    handleInput(); // otherwise game will be paused forever!
 }
 
 function handleInput() {
-    // need to do some boundary checking first!
-    if (pressedKey == "KeyW" && playerBar.y > 0) {
-        playerBar.move(-speed);
+    if (!gameState.isGamePaused()) {
+        // without the above condition, player can move bar
+        // while its paused -> no bueno!
+        // need to do some boundary checking first!
+        if (gameState.activeKeys.has("KeyW") && playerBar.y > 0) {
+            playerBar.move(-speed);
+        }
+        // 400 (h of canvas) - 70 (h of bar) = 330
+        else if (gameState.activeKeys.has("KeyS") && playerBar.y < 330) {
+            playerBar.move(speed);
+        }
     }
-    // 400 (h of canvas) - 70 (h of bar) = 330
-    else if (pressedKey == "KeyS" && playerBar.y < 330) {
-        playerBar.move(speed);
-    }    
 }
 
 /** What's all this?
@@ -176,11 +220,11 @@ function handleArenaPuckCollisions() {
     // if the puck is beyond the vertical bars, reset its location after a two-second wait
     if (puck.x < 0 || puck.x >= 700) {
         // manage score
-        if (puck.x < 0) { playerScore++; }
-        else {oppScore++;}
+        if (puck.x < 0) { gameState.score.player++; }
+        else {gameState.score.opp++;}
 
-        isPuckInArena = false;
-        puckExitTime = Date.now();
+        gameState.puckStatus.inArena = false;
+        gameState.puckStatus.arenaExitTime = Date.now();
         // relocate
         puck.x = 350;
         puck.y = 200;
