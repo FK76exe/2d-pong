@@ -152,7 +152,7 @@ addEventListener("keyup", (keyboardEvent) => {
 // add update logic here.
 Game.run = function() {
     // if the game is paused, don't change a thing
-    if (!gameState.activeKeys.has("KeyP")) {
+    if (!gameState.isGamePaused()) {
         // if someone scores 10 -> GG
         if (Math.max(gameState.score.player, gameState.score.opp) == 10) {
             // game is over, so show the winner
@@ -176,7 +176,7 @@ Game.run = function() {
 }
 
 function handleInput() {
-    if (!gameState.activeKeys.has("KeyP")) {
+    if (!gameState.isGamePaused()) {
         // without the above condition, player can move bar
         // while its paused -> no bueno!
         // need to do some boundary checking first!
