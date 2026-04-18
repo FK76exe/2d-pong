@@ -27,7 +27,7 @@ The goal of this stage is to set up the main parts of Pong:
 
 ✅ **R5:** Display scoring and end the game when one player reaches ten points.
 
-**R6:** Create a "pause" feature to freeze game movements.
+✅ **R6:** Create a "pause" feature to freeze game movements.
 Be sure to display that game is paused and tell player how to resume.
 
 **R7:** Provide a collapsible dialog on how to play the game.
