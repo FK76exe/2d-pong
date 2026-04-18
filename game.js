@@ -16,6 +16,7 @@ const canvas = document.getElementById("canvas")
  */
 const context = canvas.getContext("2d")
 
+const pauseMsg = document.getElementById("pause-msg")
 // The bars are a class
 
 /* The bar class represents the player and AI's bar.
@@ -164,7 +165,12 @@ Game.run = function() {
         handlePuckCollisions();
         handleOpponentBehaviour();
         drawCanvas();
+        pauseMsg.style.visibility = "hidden";
     }
+    else {
+        pauseMsg.style.visibility = "visible";
+    }
+
     // input should be handled regardless if game is paused or not
     handleInput(); // otherwise game will be paused forever!
 }
