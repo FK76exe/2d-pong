@@ -30,9 +30,9 @@ The goal of this stage is to set up the main parts of Pong:
 ✅**R6:** Create a "pause" feature to freeze game movements.
 Be sure to display that game is paused and tell player how to resume.
 
-**R7.1:** Display controls to guide user
+✅**R7.1:** Display controls to guide user
 
-**R7.2:** Create option to start/restart game after a game is completed.
+✅**R7.2:** Create option to start/restart game after a game is completed.
 
 # How to Run Locally
 Run a live server with `python -m http.server` in a command shell in the root directory.

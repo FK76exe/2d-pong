@@ -19,6 +19,16 @@ class GameState {
         return this.activeKeys.has("KeyP");
     }
 
+    resetGame() {
+        this.activeKeys = new Set([]);
+        this.score.player = 0;
+        this.score.opp = 0;
+    }
+
+    isGameCompleted() {
+        return Math.max(this.score.player, this.score.opp) == 10;
+    }
+
 }
 
 export default GameState;

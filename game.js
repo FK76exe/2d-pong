@@ -122,6 +122,10 @@ addEventListener("keydown", (keyboardEvent) => {
             gameState.activeKeys.add("KeyP");
         }
     }
+    else if (keyboardEvent.code == "KeyR" && gameState.isGameCompleted()) {
+        gameState.resetGame();
+        requestAnimationFrame(Game.run) // restarts the game loop
+    }
     // otherwise if it's W/S and not present, add
     else if (gameState.validKeys.has(keyboardEvent.code)) {
         // set silently ignores key if already present
@@ -130,8 +134,8 @@ addEventListener("keydown", (keyboardEvent) => {
 })
 
 addEventListener("keyup", (keyboardEvent) => {
-    // if key is P -> ignore
-    if (keyboardEvent.code == "KeyP") {
+    // if key is P or R -> ignore
+    if (keyboardEvent.code == "KeyP" || keyboardEvent.code == "KeyR") {
         return;
     }
     // else -> remove (set ignores elems that don't exist)
@@ -150,7 +154,7 @@ Game.run = function() {
     // if the game is paused, don't change a thing
     if (!gameState.isGamePaused()) {
         // if someone scores 10 -> GG
-        if (Math.max(gameState.score.player, gameState.score.opp) == 10) {
+        if (gameState.isGameCompleted()) {
             // game is over, so show the winner
             context.fillStyle = "red";
             context.textAlign = "center";
@@ -233,7 +237,8 @@ function handleArenaPuckCollisions() {
         puck.x = 350;
         puck.y = 200;
         // generate new direction vector
-        puck.vector = generateRandom2DVector();
+        // just make it travel across horizontal plane -> keeps catching player out
+        puck.vector = new Vector2D(1, 0);
 
     }
 }
@@ -325,10 +330,4 @@ function handleOpponentBehaviour() {
         // if it's equal, no need to change anything
     }
 
-}
-
-function generateRandom2DVector() {
-    // halved angles in radians s.t. player can realistically react to them
-    let angle = (Math.random()*Math.PI/4) - Math.PI/8;
-    return new Vector2D(Math.cos(angle), Math.sin(angle));
 }
