@@ -88,10 +88,6 @@ function drawCanvas() {
         // move puck
         puck.move();
     }
-    // why did I have this?
-    // while (true) {
-    //     requestAnimationFrame()
-    // }
 }
 
 // player controls
@@ -173,6 +169,7 @@ Game.run = function() {
 
     // input should be handled regardless if game is paused or not
     handleInput(); // otherwise game will be paused forever!
+    requestAnimationFrame(Game.run);
 }
 
 function handleInput() {
@@ -198,8 +195,15 @@ function handleInput() {
  * setInterval returns an ID that represents the interval timer
  * We're storing it as a property of the game module
  */
-let fps = 60;
-Game._intervalId = setInterval(Game.run, 1000 / fps);
+// let fps = 60;
+// Game._intervalId = setInterval(Game.run, 1000 / fps);
+// problem with above - not efficient! So we have to sync with screen's refresh rate
+
+// solution -> requestAnimationFrame syncs game loop to refresh rate of screen
+// may be way faster on different screens. but this is an amateur project so
+// why care?
+requestAnimationFrame(Game.run) 
+
 // http://nokarma.org/2011/02/02/javascript-game-development-the-game-loop/index.html
 
 function handlePuckCollisions() {
@@ -324,6 +328,7 @@ function handleOpponentBehaviour() {
 }
 
 function generateRandom2DVector() {
-    let angle = (Math.random()*Math.PI/2) - Math.PI/4;
+    // halved angles in radians s.t. player can realistically react to them
+    let angle = (Math.random()*Math.PI/4) - Math.PI/8;
     return new Vector2D(Math.cos(angle), Math.sin(angle));
 }
